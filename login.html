@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GigiFarm — Login / Register</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tab-active { background:#065f46; color:white; }
+    .hidden { display:none; }
+  </style>
+</head>
+<body class="bg-emerald-50 min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-3xl w-full bg-white rounded-lg shadow-lg grid grid-cols-1 md:grid-cols-2 overflow-hidden" role="main">
+
+    <!-- Left: branding -->
+    <aside class="p-6 bg-emerald-600 text-white" aria-labelledby="brandTitle">
+      <h2 id="brandTitle" class="text-2xl font-bold">GigiFarm</h2>
+      <p class="mt-2 text-emerald-100">Turn everyday farming tasks into verified micro-gigs.</p>
+      <div class="mt-6">
+        <p class="text-sm">Already have an account? Use the Login tab on the right.</p>
+      </div>
+    </aside>
+
+    <!-- Right: tabs and forms -->
+    <section class="p-6" aria-labelledby="authTitle">
+      <h3 id="authTitle" class="sr-only">Authentication</h3>
+
+      <!-- Tabs -->
+      <div class="flex gap-2 mb-4" role="tablist" aria-label="Authentication tabs">
+        <!-- aria-controls values updated to match actual element IDs (loginForm / registerForm) -->
+        <button id="tabLogin" role="tab" aria-selected="true" aria-controls="loginForm" class="px-3 py-1 rounded border tab-active">Login</button>
+        <button id="tabRegister" role="tab" aria-selected="false" aria-controls="registerForm" class="px-3 py-1 rounded border">Register</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" novalidate aria-labelledby="loginHeading" role="form">
+        <h4 id="loginHeading" class="text-lg font-medium mb-3">Sign in to your account</h4>
+
+        <div>
+          <label for="loginEmail" class="block text-sm font-medium">Email</label>
+          <input id="loginEmail" name="loginEmail" type="email" required
+                 class="mt-1 p-2 border rounded w-full" placeholder="you@example.com" />
+        </div>
+
+        <div class="mt-3">
+          <label for="loginPassword" class="block text-sm font-medium">Password</label>
+          <input id="loginPassword" name="loginPassword" type="password" required
+                 class="mt-1 p-2 border rounded w-full" placeholder="Enter your password" />
+        </div>
+
+        <div class="mt-4 flex gap-2">
+          <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded">Login</button>
+          <a href="index.html" class="px-4 py-2 border rounded inline-flex items-center">Back</a>
+        </div>
+
+        <!-- Accessible live region for login messages -->
+        <div id="loginMsg" class="mt-3 text-sm" aria-live="polite"></div>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="registerForm" class="hidden" novalidate aria-labelledby="registerHeading" role="form">
+        <h4 id="registerHeading" class="text-lg font-medium mb-3">Create an account</h4>
+
+        <div>
+          <label for="regName" class="block text-sm font-medium">Full name</label>
+          <input id="regName" name="regName" type="text" required class="mt-1 p-2 border rounded w-full" placeholder="Your full name" />
+        </div>
+
+        <div class="mt-3">
+          <label for="regEmail" class="block text-sm font-medium">Email</label>
+          <input id="regEmail" name="regEmail" type="email" required class="mt-1 p-2 border rounded w-full" placeholder="you@example.com" />
+        </div>
+
+        <div class="mt-3">
+          <label for="regPhone" class="block text-sm font-medium">Phone</label>
+          <input id="regPhone" name="regPhone" type="tel" class="mt-1 p-2 border rounded w-full" placeholder="+91 98X XXX XXXX" />
+        </div>
+
+        <div class="mt-3">
+          <label for="regPassword" class="block text-sm font-medium">Password</label>
+          <input id="regPassword" name="regPassword" type="password" required class="mt-1 p-2 border rounded w-full" placeholder="Choose a strong password" />
+        </div>
+
+        <div class="mt-3">
+          <label for="regRole" class="block text-sm font-medium">Role</label>
+          <select id="regRole" name="regRole" class="mt-1 p-2 border rounded w-full" aria-describedby="roleHelp">
+            <option value="farm_worker">Farm Worker</option>
+            <option value="farm_owner">Farm Owner</option>
+            <option value="analyst">Analyst</option>
+            <option value="supervisor">Supervisor</option>
+          </select>
+          <div id="roleHelp" class="text-xs text-slate-500 mt-1">Select the role that best describes you.</div>
+        </div>
+
+        <!-- Role-specific fields grouped with aria-live for dynamic updates -->
+        <div id="roleFields" class="mt-3" aria-live="polite">
+          <!-- Farm Worker -->
+          <fieldset data-role="farm_worker" id="fields_farm_worker" class="">
+            <legend class="sr-only">Farm Worker details</legend>
+
+            <div>
+              <label for="workerId" class="block text-sm font-medium">Worker ID</label>
+              <input id="workerId" name="workerId" type="text" class="mt-1 p-2 border rounded w-full" placeholder="Optional worker ID" />
+            </div>
+
+            <div class="mt-2">
+              <label for="workerSkills" class="block text-sm font-medium">Skills</label>
+              <input id="workerSkills" name="workerSkills" type="text" class="mt-1 p-2 border rounded w-full" placeholder="e.g. weeding, irrigation" />
+            </div>
+          </fieldset>
+
+          <!-- Farm Owner -->
+          <fieldset data-role="farm_owner" id="fields_farm_owner" class="hidden">
+            <legend class="sr-only">Farm Owner details</legend>
+            <div>
+              <label for="farmName" class="block text-sm font-medium">Farm Name</label>
+              <input id="farmName" name="farmName" type="text" class="mt-1 p-2 border rounded w-full" placeholder="Name of your farm" />
+            </div>
+            <div class="mt-2">
+              <label for="numPlots" class="block text-sm font-medium">Number of plots</label>
+              <input id="numPlots" name="numPlots" type="number" min="0" class="mt-1 p-2 border rounded w-full" placeholder="0" />
+            </div>
+          </fieldset>
+
+          <!-- Supervisor -->
+          <fieldset data-role="supervisor" id="fields_supervisor" class="hidden">
+            <legend class="sr-only">Supervisor details</legend>
+            <div>
+              <label for="supervisorOrg" class="block text-sm font-medium">Organisation</label>
+              <input id="supervisorOrg" name="supervisorOrg" type="text" class="mt-1 p-2 border rounded w-full" placeholder="Your organisation" />
+            </div>
+            <div class="mt-2">
+              <label for="managedFarms" class="block text-sm font-medium">Managed farms</label>
+              <input id="managedFarms" name="managedFarms" type="text" class="mt-1 p-2 border rounded w-full" placeholder="Comma separated list" />
+            </div>
+          </fieldset>
+
+          <!-- Analyst -->
+          <fieldset data-role="analyst" id="fields_analyst" class="hidden">
+            <legend class="sr-only">Analyst details</legend>
+            <div>
+              <label for="analystOrg" class="block text-sm font-medium">Organization</label>
+              <input id="analystOrg" name="analystOrg" type="text" class="mt-1 p-2 border rounded w-full" placeholder="Organization name" />
+            </div>
+            <div class="mt-2">
+              <label for="analystAccess" class="block text-sm font-medium">Access level</label>
+              <select id="analystAccess" name="analystAccess" class="mt-1 p-2 border rounded w-full">
+                <option value="read">Read</option>
+                <option value="write">Write</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="mt-4 flex gap-2">
+          <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded">Register</button>
+          <button type="button" id="regCancel" class="px-4 py-2 border rounded">Cancel</button>
+        </div>
+
+        <!-- Accessible live region for registration messages -->
+        <div id="regMsg" class="mt-3 text-sm" aria-live="polite"></div>
+      </form>
+    </section>
+  </div>
+
+<script>
+/* Accessible client-side registration & login logic. */
+/* Data: localStorage 'gigifarm_users' */
+async function sha256Hex(str){
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest('SHA-256', enc.encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function getUsers(){ try { return JSON.parse(localStorage.getItem('gigifarm_users') || '[]'); } catch(e){ return []; } }
+function saveUsers(users){ localStorage.setItem('gigifarm_users', JSON.stringify(users)); }
+
+/* Tab behavior */
+const tabLogin = document.getElementById('tabLogin');
+const tabRegister = document.getElementById('tabRegister');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const loginMsg = document.getElementById('loginMsg');
+const regMsg = document.getElementById('regMsg');
+
+function activateTab(tabName){
+  if(tabName === 'login'){
+    tabLogin.classList.add('tab-active'); tabLogin.setAttribute('aria-selected','true'); tabLogin.focus();
+    tabRegister.classList.remove('tab-active'); tabRegister.setAttribute('aria-selected','false');
+    loginForm.classList.remove('hidden'); registerForm.classList.add('hidden');
+  } else {
+    tabRegister.classList.add('tab-active'); tabRegister.setAttribute('aria-selected','true'); tabRegister.focus();
+    tabLogin.classList.remove('tab-active'); tabLogin.setAttribute('aria-selected','false');
+    registerForm.classList.remove('hidden'); loginForm.classList.add('hidden');
+  }
+}
+tabLogin.addEventListener('click', ()=> activateTab('login'));
+tabRegister.addEventListener('click', ()=> activateTab('register'));
+
+/* Role field toggling with accessible approach */
+const regRole = document.getElementById('regRole');
+const roleFieldsets = Array.from(document.querySelectorAll('#roleFields [data-role]'));
+function showRoleFields(role){
+  roleFieldsets.forEach(fs => {
+    if(fs.getAttribute('data-role') === role){
+      fs.classList.remove('hidden');
+      // expose fields for screen readers
+      Array.from(fs.querySelectorAll('input,select')).forEach(el => el.removeAttribute('aria-hidden'));
+    } else {
+      fs.classList.add('hidden');
+      Array.from(fs.querySelectorAll('input,select')).forEach(el => el.setAttribute('aria-hidden','true'));
+    }
+  });
+}
+regRole.addEventListener('change', ()=> showRoleFields(regRole.value));
+// initialize
+showRoleFields(regRole.value);
+
+/* Registration handler */
+registerForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  regMsg.textContent = '';
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const phone = document.getElementById('regPhone').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const role = regRole.value;
+
+  if(!name || !email || !password){
+    regMsg.textContent = 'Please fill required fields.'; regMsg.style.color='red'; return;
+  }
+
+  const users = getUsers();
+  if(users.find(u=>u.email === email)){
+    regMsg.textContent = 'Email already registered. Please login.'; regMsg.style.color='red'; return;
+  }
+
+  const pwdHash = await sha256Hex(password + '::gigifyfarm_salt');
+
+  let role_meta = {};
+  if(role === 'farm_worker'){
+    role_meta.worker_id = document.getElementById('workerId').value.trim();
+    role_meta.skills = document.getElementById('workerSkills').value.trim();
+  } else if(role === 'farm_owner'){
+    role_meta.farm_name = document.getElementById('farmName').value.trim();
+    role_meta.number_of_plots = document.getElementById('numPlots').value;
+  } else if(role === 'supervisor'){
+    role_meta.org_name = document.getElementById('supervisorOrg').value.trim();
+    role_meta.managed_farms = document.getElementById('managedFarms').value.trim();
+  } else if(role === 'analyst'){
+    role_meta.organization = document.getElementById('analystOrg').value.trim();
+    role_meta.access_level = document.getElementById('analystAccess').value;
+  }
+
+  const newUser = {
+    id: 'u_' + Date.now(),
+    name, email, phone,
+    password_hash: pwdHash,
+    role,
+    role_meta,
+    created_at: new Date().toISOString(),
+    verified: false
+  };
+
+  users.push(newUser);
+  saveUsers(users);
+
+  regMsg.innerHTML = 'Registered. A verification email was sent (mock). Please click Verify below to simulate.';
+  regMsg.style.color='green';
+
+  const verifyBtn = document.createElement('button');
+  verifyBtn.textContent = 'Verify Email (mock)';
+  verifyBtn.className = 'mt-2 px-3 py-1 rounded bg-blue-600 text-white';
+  verifyBtn.onclick = ()=>{
+    newUser.verified = true;
+    const all = getUsers().map(u => u.email === newUser.email ? newUser : u);
+    saveUsers(all);
+    regMsg.innerHTML = 'Email verified. You can now login.';
+    verifyBtn.remove();
+  };
+  regMsg.appendChild(document.createElement('br'));
+  regMsg.appendChild(verifyBtn);
+});
+
+/* Register cancel */
+document.getElementById('regCancel').addEventListener('click', ()=> activateTab('login'));
+
+/* Login handler */
+loginForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  loginMsg.textContent = '';
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+
+  if(!email || !password){ loginMsg.textContent = 'Enter email and password.'; loginMsg.style.color='red'; return; }
+
+  const users = getUsers();
+  const user = users.find(u => u.email === email);
+  if(!user){ loginMsg.textContent = 'No user found. Please register.'; loginMsg.style.color='red'; return; }
+  const pwdHash = await sha256Hex(password + '::gigifyfarm_salt');
+  if(pwdHash !== user.password_hash){ loginMsg.textContent = 'Incorrect password.'; loginMsg.style.color='red'; return; }
+  if(!user.verified){ loginMsg.textContent = 'Email not verified. Please verify (mock).'; loginMsg.style.color='red'; return; }
+
+  // Login success — store current session and redirect to dashboard
+  localStorage.setItem('gigifarm_currentUser', JSON.stringify({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    role_meta: user.role_meta
+  }));
+  window.location.href = 'dashboard.html';
+});
+
+/* Seed demo user if none exist (for convenience) */
+(function seedDemo(){
+  const users = getUsers();
+  if(users.length === 0){
+    (async ()=>{
+      const demoPwdHash = await sha256Hex('password123::gigifyfarm_salt');
+      const demo = {
+        id: 'u_demo',
+        name: 'Demo Worker',
+        email: 'worker@example.com',
+        phone: '',
+        password_hash: demoPwdHash,
+        role: 'farm_worker',
+        role_meta: { worker_id: 'W001', skills: 'weeding,irrigation' },
+        created_at: new Date().toISOString(),
+        verified: true
+      };
+      users.push(demo);
+      saveUsers(users);
+      console.log('Demo user seeded: worker@example.com / password123');
+    })();
+  }
+})();
+fetch('http://localhost:4000/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: emailValue, password: passwordValue })
+})
+.then(res => res.json())
+.then(data => {
+  if(data.token){
+    localStorage.setItem('gigifarm_token', data.token);
+    // redirect to dashboard or fetch /api/auth/me
+  } else {
+    // show error from backend
+  }
+});
+
+</script>
+</body>
+</html>

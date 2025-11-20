@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GigiFarm — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .modal-backdrop { transition: opacity 160ms ease; }
+    .toast { transition: transform 160ms ease, opacity 160ms ease; }
+  </style>
+</head>
+<body class="bg-emerald-50 min-h-screen">
+  <div class="max-w-5xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-emerald-600 text-white rounded flex items-center justify-center">GF</div>
+        <div>
+          <div id="userName" class="font-bold text-lg">User</div>
+          <div id="userRole" class="text-sm text-slate-600">Role</div>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="logoutBtn" class="px-3 py-2 border rounded">Logout</button>
+      </div>
+    </div>
+
+    <div id="roleArea" class="bg-white rounded-lg p-6 shadow"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center" aria-hidden="true">
+    <div class="absolute inset-0 bg-black/40 modal-backdrop"></div>
+    <div class="relative z-10 w-full max-w-2xl p-4">
+      <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b">
+          <h3 id="modalTitle" class="font-semibold text-lg">Details</h3>
+          <button id="modalClose" class="px-3 py-1 rounded border">Close</button>
+        </div>
+        <div class="p-4" id="modalBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer" class="fixed right-4 bottom-6 z-50 space-y-2"></div>
+
+<script>
+/* ============================================================
+   CURRENT-ONLY DASHBOARD
+   - Redirect to login.html if no current user in localStorage
+   - Render role-specific UI for the logged-in user only
+   - Does NOT auto-seed or switch demo users
+   ============================================================ */
+
+/* Fallback dataset used only if you don't supply real data.
+   This is NOT automatically persisted or used to log a user in. */
+const fallbackData = {
+  farm_worker: [
+    { id: 't_fw_001', title: 'Irrigate North Field', description: 'Water the north tomato beds for 20 minutes', date: '2025-11-19', points: 10, status: 'pending', proof: '' },
+    { id: 't_fw_002', title: 'Weed removal - Plot B3', description: 'Remove weeds from B3', date: '2025-11-18', points: 8, status: 'submitted', proof: 'photo_weed_b3.jpg' },
+    { id: 't_fw_003', title: 'Apply compost', description: 'Spread 10kg compost across seedling trays', date: '2025-11-17', points: 12, status: 'verified', proof: 'compost_receipt.pdf' },
+    { id: 't_fw_004', title: 'Pest check', description: 'Inspect cabbages for pests and log findings', date: '2025-11-16', points: 6, status: 'pending', proof: '' }
+  ],
+  farm_owner: [
+    { id: 'o_001', title: 'Monthly Yield Report', description: 'Review and sign off the Oct 2025 yield report', date: '2025-11-05', importance: 'high', status: 'awaiting-review' },
+    { id: 'o_002', title: 'Set Reward Policy', description: 'Define points-to-cash conversion and seasonal bonuses', date: '2025-11-10', importance: 'medium', status: 'draft' },
+    { id: 'o_003', title: 'Approve Equipment Purchase', description: 'Approve tractor service & parts purchase', date: '2025-11-12', importance: 'high', status: 'pending-approval' },
+    { id: 'o_004', title: 'Farm Roster Update', description: 'Confirm hire for harvest season (3 workers)', date: '2025-11-14', importance: 'low', status: 'completed' }
+  ],
+  supervisor: [
+    { id: 's_001', worker: 'Ramu Patel', gig: 'Weed removal - Plot B3', submitted: '2025-11-18', points: 8, status: 'awaiting' },
+    { id: 's_002', worker: 'Kishore', gig: 'Irrigate North Field', submitted: '2025-11-19', points: 10, status: 'awaiting' },
+    { id: 's_003', worker: 'Mamta', gig: 'Apply compost', submitted: '2025-11-17', points: 12, status: 'verified' },
+    { id: 's_004', worker: 'Raju', gig: 'Pest check', submitted: '2025-11-16', points: 6, status: 'rejected' }
+  ],
+  analyst: [
+    { id: 'a_001', title: 'Yield Trends Q3', description: 'Aggregate yields across plots for Q3 2025', lastRun: '2025-11-15', rows: 1240, lastBy: 'Dr. Anika' },
+    { id: 'a_002', title: 'Water Usage Report', description: 'Per-plot water consumption analysis', lastRun: '2025-11-10', rows: 890, lastBy: 'Dr. Anika' },
+    { id: 'a_003', title: 'Worker Productivity', description: 'Compare points earned vs hours logged', lastRun: '2025-11-08', rows: 670, lastBy: 'Team Data' },
+    { id: 'a_004', title: 'Pest Incidence Map', description: 'Heatmap of pest reports over last 6 months', lastRun: '2025-11-12', rows: 430, lastBy: 'ML Pipeline' }
+  ]
+};
+
+// Path to the uploaded proof image (provided earlier)
+const proofUrl = '/mnt/data/e40cb9fe-3248-4040-bfa5-a004206cd003.png';
+
+/* Grab current user from localStorage. IMPORTANT:
+   Your login flow should set localStorage.gigifarm_currentUser to:
+   { id: "...", name: "...", role: "farm_worker" | "farm_owner" | "supervisor" | "analyst" }
+*/
+const current = JSON.parse(localStorage.getItem('gigifarm_currentUser') || 'null');
+
+if(!current){
+  // If no logged-in user, redirect to login page (expected behavior)
+  window.location.href = 'login.html';
+  // stop executing further (defensive)
+} else {
+  document.getElementById('userName').textContent = current.name;
+  document.getElementById('userRole').textContent = (current.role || '').replace('_',' ').toUpperCase();
+}
+
+/* Data access: first try localStorage.gigifarm_demoData if it's present (e.g. by backend or other flows),
+   otherwise fall back to fallbackData defined above. This does NOT auto-login anyone. */
+function getDemoData(){
+  return JSON.parse(localStorage.getItem('gigifarm_demoData') || JSON.stringify(fallbackData));
+}
+function setDemoData(d){
+  localStorage.setItem('gigifarm_demoData', JSON.stringify(d));
+}
+
+/* ---------- Modal & Toast ---------- */
+const modalEl = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+document.getElementById('modalClose').addEventListener('click', hideModal);
+modalEl.addEventListener('click', (e)=> { if(e.target === modalEl) hideModal(); });
+
+function showModal(title, htmlContent){
+  modalTitle.textContent = title;
+  modalBody.innerHTML = htmlContent;
+  modalEl.classList.remove('hidden');
+  modalEl.style.display = 'flex';
+  setTimeout(()=> modalEl.querySelector('.modal-backdrop').style.opacity = '1', 10);
+}
+function hideModal(){
+  modalEl.querySelector('.modal-backdrop').style.opacity = '0';
+  setTimeout(()=> { modalEl.style.display='none'; modalEl.classList.add('hidden'); }, 160);
+}
+
+const toastContainer = document.getElementById('toastContainer');
+function showToast(text, duration = 2400){
+  const id = 't' + Date.now();
+  const el = document.createElement('div');
+  el.id = id;
+  el.className = 'toast transform translate-y-4 opacity-0 bg-white border rounded p-3 shadow';
+  el.innerHTML = `<div class="text-sm">${escapeHtml(text)}</div>`;
+  toastContainer.appendChild(el);
+  requestAnimationFrame(()=> {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  });
+  setTimeout(()=> {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(12px)';
+    setTimeout(()=> { el.remove(); }, 200);
+  }, duration);
+}
+
+function escapeHtml(str){
+  if(!str && str !== 0) return '';
+  return String(str)
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'",'&#39;');
+}
+
+/* ---------- Render helpers ---------- */
+const area = document.getElementById('roleArea');
+
+function renderTasksList(items, type){
+  if(!items || !items.length) return '<p class="text-slate-500">No items found.</p>';
+  let html = '<div class="space-y-3">';
+  items.forEach(item => {
+    if(type === 'worker'){
+      html += `
+        <div class="border rounded p-3 flex justify-between items-start">
+          <div>
+            <div class="font-semibold">${escapeHtml(item.title)}</div>
+            <div class="text-sm text-slate-600">${escapeHtml(item.description)}</div>
+            <div class="text-xs text-slate-500 mt-1">Date: ${escapeHtml(item.date)} • Points: ${item.points} • Status: ${escapeHtml(item.status)}</div>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <div>${item.proof ? `<span class="text-xs px-2 py-1 border rounded">${escapeHtml(item.proof)}</span>` : '<span class="text-xs text-slate-400">No proof</span>'}</div>
+            <div class="flex gap-2">
+              <button data-action="submit" data-id="${item.id}" class="px-2 py-1 text-sm border rounded">Submit</button>
+              <button data-action="details" data-id="${item.id}" class="px-2 py-1 text-sm border rounded">Details</button>
+            </div>
+          </div>
+        </div>`;
+    } else if(type === 'owner'){
+      html += `
+        <div class="border rounded p-3 flex justify-between items-start">
+          <div>
+            <div class="font-semibold">${escapeHtml(item.title)}</div>
+            <div class="text-sm text-slate-600">${escapeHtml(item.description)}</div>
+            <div class="text-xs text-slate-500 mt-1">Date: ${escapeHtml(item.date)} • Importance: ${escapeHtml(item.importance)} • Status: ${escapeHtml(item.status)}</div>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <button data-action="open" data-id="${item.id}" class="px-3 py-1 text-sm border rounded bg-emerald-600 text-white">Open</button>
+          </div>
+        </div>`;
+    } else if(type === 'supervisor'){
+      html += `
+        <div class="border rounded p-3 flex justify-between items-start">
+          <div>
+            <div class="font-semibold">${escapeHtml(item.gig)}</div>
+            <div class="text-sm text-slate-600">Worker: ${escapeHtml(item.worker)} • Submitted: ${escapeHtml(item.submitted)}</div>
+            <div class="text-xs text-slate-500 mt-1">Points: ${item.points} • Status: ${escapeHtml(item.status)}</div>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <button data-action="verify" data-id="${item.id}" class="px-2 py-1 text-sm border rounded bg-emerald-600 text-white">Verify</button>
+            <button data-action="reject" data-id="${item.id}" class="px-2 py-1 text-sm border rounded">Reject</button>
+          </div>
+        </div>`;
+    } else if(type === 'analyst'){
+      html += `
+        <div class="border rounded p-3 flex justify-between items-start">
+          <div>
+            <div class="font-semibold">${escapeHtml(item.title)}</div>
+            <div class="text-sm text-slate-600">${escapeHtml(item.description)}</div>
+            <div class="text-xs text-slate-500 mt-1">Last run: ${escapeHtml(item.lastRun)} • Rows: ${item.rows} • By: ${escapeHtml(item.lastBy)}</div>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <button data-action="run" data-id="${item.id}" class="px-2 py-1 text-sm border rounded">Run</button>
+            <button data-action="download" data-id="${item.id}" class="px-2 py-1 text-sm border rounded">Download</button>
+          </div>
+        </div>`;
+    }
+  });
+  html += '</div>';
+  return html;
+}
+
+/* ---------- Render per-role for the logged-in user ---------- */
+function renderForRole(user){
+  const data = getDemoData();
+  if(user.role === 'farm_worker'){
+    area.innerHTML = `
+      <h3 class="font-semibold">Farm Worker Dashboard</h3>
+      <p class="mt-2 text-slate-600">Create or submit micro-gigs, view your history and earned points.</p>
+      <div class="mt-4">
+        <button id="createGig" class="px-3 py-2 bg-emerald-600 text-white rounded">Create Micro-Gig</button>
+      </div>
+      <div class="mt-6">
+        <h4 class="font-medium">Your Tasks</h4>
+        ${renderTasksList(data.farm_worker, 'worker')}
+      </div>`;
+  } else if(user.role === 'farm_owner'){
+    area.innerHTML = `
+      <h3 class="font-semibold">Farm Owner Dashboard</h3>
+      <p class="mt-2 text-slate-600">View farm analytics, workers roster, set reward policies.</p>
+      <div class="mt-6">
+        <h4 class="font-medium">Owner To-Dos</h4>
+        ${renderTasksList(data.farm_owner, 'owner')}
+      </div>`;
+  } else if(user.role === 'supervisor'){
+    area.innerHTML = `
+      <h3 class="font-semibold">Supervisor Dashboard</h3>
+      <p class="mt-2 text-slate-600">Verify submitted micro-gigs and manage verification queue.</p>
+      <div class="mt-6">
+        <h4 class="font-medium">Verification Queue</h4>
+        ${renderTasksList(data.supervisor, 'supervisor')}
+      </div>`;
+  } else if(user.role === 'analyst'){
+    area.innerHTML = `
+      <h3 class="font-semibold">Analyst Dashboard</h3>
+      <p class="mt-2 text-slate-600">Access anonymized data and run analysis tools.</p>
+      <div class="mt-6">
+        <h4 class="font-medium">Saved Reports & Datasets</h4>
+        ${renderTasksList(data.analyst, 'analyst')}
+      </div>`;
+  } else {
+    area.innerHTML = '<p class="text-red-600">Unknown role</p>';
+  }
+  attachAreaListeners(user);
+}
+
+/* ---------- Interactivity: attach listeners for current user's UI ---------- */
+function attachAreaListeners(user){
+  const createBtn = document.getElementById('createGig');
+  if(createBtn){
+    createBtn.addEventListener('click', ()=>{
+      // In production you would call backend to create a gig. This demo adds to in-memory data only.
+      const data = getDemoData();
+      const newTask = {
+        id: 't_fw_' + Math.floor(Math.random()*100000),
+        title: 'New micro-gig',
+        description: 'Created from dashboard',
+        date: new Date().toISOString().slice(0,10),
+        points: 5,
+        status: 'pending',
+        proof: ''
+      };
+      data.farm_worker = data.farm_worker || [];
+      data.farm_worker.unshift(newTask);
+      setDemoData(data); // optional persistence for demo
+      renderForRole(user);
+      showToast('Micro-gig created.');
+    });
+  }
+
+  // Delegate clicks within role area
+  area.querySelectorAll('button').forEach(btn => {
+    const action = btn.getAttribute('data-action');
+    const id = btn.getAttribute('data-id');
+    if(!action) return;
+
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const data = getDemoData();
+
+      if(user.role === 'farm_worker'){
+        if(action === 'submit'){
+          const idx = (data.farm_worker||[]).findIndex(t=>t.id === id);
+          if(idx >= 0){
+            data.farm_worker[idx].status = 'submitted';
+            data.farm_worker[idx].proof = 'photo_' + Date.now() + '.jpg';
+            setDemoData(data);
+            renderForRole(user);
+            showToast('Submitted (demo).');
+          }
+        } else if(action === 'details'){
+          const t = (data.farm_worker||[]).find(t=>t.id === id);
+          const body = `
+            <div class="space-y-2">
+              <div><strong>Title:</strong> ${escapeHtml(t.title)}</div>
+              <div><strong>Description:</strong> ${escapeHtml(t.description)}</div>
+              <div><strong>Date:</strong> ${escapeHtml(t.date)}</div>
+              <div><strong>Points:</strong> ${t.points}</div>
+              <div><strong>Status:</strong> ${escapeHtml(t.status)}</div>
+              <div><strong>Proof:</strong> ${escapeHtml(t.proof || 'None')}</div>
+            </div>`;
+          showModal('Task details', body);
+        }
+      } else if(user.role === 'supervisor'){
+        const idx = (data.supervisor||[]).findIndex(s=>s.id === id);
+        if(action === 'verify' && idx >= 0){
+          data.supervisor[idx].status = 'verified';
+          setDemoData(data);
+          renderForRole(user);
+          showToast('Verified (demo).');
+        } else if(action === 'reject' && idx >= 0){
+          data.supervisor[idx].status = 'rejected';
+          setDemoData(data);
+          renderForRole(user);
+          showToast('Rejected (demo).');
+        }
+      } else if(user.role === 'analyst'){
+        const idx = (data.analyst||[]).findIndex(a=>a.id === id);
+        if(action === 'run' && idx >= 0){
+          data.analyst[idx].lastRun = new Date().toISOString().slice(0,10);
+          setDemoData(data);
+          renderForRole(user);
+          showToast('Report run (demo).');
+        } else if(action === 'download'){
+          showToast('Preparing download (demo).');
+        }
+      } else if(user.role === 'farm_owner'){
+        if(action === 'open'){
+          const item = (data.farm_owner||[]).find(it=>it.id === id) || {};
+          // Show modal with details and a download button (download attribute forces save)
+          const body = `
+            <div class="space-y-2">
+              <div><strong>Title:</strong> ${escapeHtml(item.title || '')}</div>
+              <div><strong>Description:</strong> ${escapeHtml(item.description || '')}</div>
+              <div><strong>Date:</strong> ${escapeHtml(item.date || '')}</div>
+              <div><strong>Importance:</strong> ${escapeHtml(item.importance || '')}</div>
+              <div><strong>Status:</strong> ${escapeHtml(item.status || '')}</div>
+
+              <div class="mt-3">
+                <img src="${proofUrl}" onerror="this.style.display='none'" class="rounded border max-h-60 object-contain"/>
+              </div>
+
+              <div class="pt-3">
+                <a href="${proofUrl}" download="proof-report.png" class="px-4 py-2 bg-emerald-600 text-white rounded">
+                  Download Proof Report
+                </a>
+              </div>
+            </div>`;
+          showModal('Owner Item', body);
+        }
+      }
+    });
+  });
+}
+
+/* ---------- Top-level actions ---------- */
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  localStorage.removeItem('gigifarm_currentUser');
+  // redirect to login or refresh
+  window.location.href = 'login.html';
+});
+
+/* ---------- Initial render ---------- */
+if(current){
+  renderForRole(current);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GigiFarm — Reimagining Agricultural Work</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .hero-image {
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(16, 185, 129, 0.08);
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+
+<body class="bg-emerald-50 text-slate-900 antialiased">
+
+  <!-- Header -->
+  <header class="w-full bg-white/90 border-b border-white/60 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <div class="flex items-center gap-3">
+          <a href="#" class="inline-flex items-center gap-3">
+            <div class="w-10 h-10 rounded-md bg-emerald-600 text-white flex items-center justify-center font-semibold shadow">GF</div>
+            <span class="font-semibold text-slate-800">KrishiOps</span>
+          </a>
+        </div>
+
+        <!-- Working Login Button -->
+        <nav class="flex items-center gap-4">
+          <a href="#home" class="text-slate-700 hover:text-emerald-600 font-medium">Home</a>
+
+          <button onclick="location.href='login.html'"
+            class="px-4 py-1.5 bg-emerald-600 text-white rounded-md text-sm font-medium shadow hover:bg-emerald-700">
+            Login
+          </button>
+        </nav>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main id="home" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+
+    <!-- HERO SECTION -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+
+      <!-- Text Column -->
+      <div class="order-2 lg:order-1">
+        <span class="inline-flex items-center bg-emerald-100 text-emerald-800 text-sm font-medium px-3 py-1 rounded-full mb-4">
+          Reimagining Agricultural Work
+        </span>
+
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
+          Gigifying Farming — The future of agricultural work
+        </h1>
+
+        <p class="mt-4 text-slate-700 max-w-xl">
+          Transform everyday field practices into traceable micro-gigs. We turn sustainable farming choices into
+          measurable, accountable, and economically rewarding actions.
+        </p>
+
+        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+
+          <!-- UPDATED BUTTON -->
+          <a onclick="location.href='login.html'"
+            class="inline-flex items-center justify-center px-5 py-3 bg-emerald-600 text-white rounded-md shadow hover:bg-emerald-700 cursor-pointer">
+            Get Started
+          </a>
+
+          <a href="#how"
+            class="inline-flex items-center justify-center px-5 py-3 border border-emerald-200 text-emerald-700 rounded-md hover:bg-emerald-50">
+            Learn More
+          </a>
+        </div>
+      </div>
+
+      <!-- Hero Image -->
+      <div class="order-1 lg:order-2 flex justify-center">
+        <div class="w-full max-w-md h-64 sm:h-72 lg:h-80 rounded-xl overflow-hidden">
+          <img src="efaff865-8fd8-4b30-b0ca-d41241f5e236.png"
+            alt="Terraced fields"
+            class="hero-image">
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- FEATURES -->
+    <section id="features" class="mt-14">
+      <div class="text-center max-w-3xl mx-auto">
+        <h2 class="text-2xl font-bold text-slate-900">Powerful Features for Modern Farming</h2>
+        <p class="mt-3 text-slate-600">Our platform transforms agricultural work into meaningful micro-actions.</p>
+      </div>
+
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div class="p-5 bg-white rounded-lg shadow-sm border">
+          <div class="w-10 h-10 rounded bg-emerald-100 flex items-center justify-center mb-3">✓</div>
+          <h3 class="font-semibold">Traceable Micro-Actions</h3>
+          <p class="text-sm text-slate-600 mt-2">Every activity becomes a micro-gig with a proof trail.</p>
+        </div>
+
+        <div class="p-5 bg-white rounded-lg shadow-sm border">
+          <div class="w-10 h-10 rounded bg-emerald-100 flex items-center justify-center mb-3">🔒</div>
+          <h3 class="font-semibold">Verified Behavior</h3>
+          <p class="text-sm text-slate-600 mt-2">Authentic verification of farming practices.</p>
+        </div>
+
+        <div class="p-5 bg-white rounded-lg shadow-sm border">
+          <div class="w-10 h-10 rounded bg-amber-100 flex items-center justify-center mb-3">💰</div>
+          <h3 class="font-semibold">Economic Rewards</h3>
+          <p class="text-sm text-slate-600 mt-2">Earn points and redeem value through farm work.</p>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="mt-14 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+
+      <!-- Image -->
+      <div class="order-1">
+        <div class="w-full h-64 sm:h-72 md:h-80 rounded-xl overflow-hidden">
+          <img src="2d68b8aa-8a93-4423-86e0-5579ac8699d9.png"
+            alt="Farmer using AI"
+            class="hero-image">
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="order-2">
+        <h2 class="text-2xl font-bold">How It Works</h2>
+        <p class="mt-3 text-slate-600">A simple 4-step process:</p>
+
+        <ul class="mt-5 space-y-4">
+          <li class="flex gap-3"><span class="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center">01</span> Define Your Actions: Break down your daily farming activities into micro-gigs. From planting to harvesting, every action counts.</li>
+          <li class="flex gap-3"><span class="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center">02</span> Verify & track: Our system verifies your sustainable practices and creates an immutable record of your farming journey.</li>
+          <li class="flex gap-3"><span class="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center">03</span> Earn rewards: Get recognized and rewarded for your responsible farming decisions with tangible economic incentives.</li>
+          <li class="flex gap-3"><span class="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center">04</span> Grow & scale: Use insights and analytics to optimize your farming practices and increase your impact over time.</li>
+        </ul>
+
+      </div>
+
+    </section>
+
+
+    <!-- CTA -->
+    <section class="mt-12 bg-emerald-600 text-white rounded-xl p-8 text-center shadow">
+      <h3 class="text-2xl font-bold">Ready to Transform Your Farming?</h3>
+      <p class="mt-2 text-emerald-100">Join farmers turning daily actions into verified micro-gigs.</p>
+
+      <!-- UPDATED BUTTON -->
+      <a onclick="location.href='login.html'"
+        class="mt-5 inline-block bg-white text-emerald-600 px-5 py-3 rounded-md font-semibold shadow cursor-pointer">
+        Start Your Journey
+      </a>
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="mt-12 pb-12">
+      <div class="border-t pt-8 text-center text-slate-600">
+        © 2025 GigiFarm. All rights reserved.
+      </div>
+    </footer>
+
+  </main>
+
+</body>
+</html>
